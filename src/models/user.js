@@ -55,6 +55,10 @@ module.exports = (sequelize, DataTypes) => {
     nomor_telepon: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    refreshToken: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     tableName: 'User',
@@ -68,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     defaultScope: {
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password', 'refreshToken'] }
     },
     scopes: {
       withPassword: {

@@ -2,11 +2,19 @@ const { User, Laboratorium, Role } = require('../models');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 
-const generateToken = (user) => {
+const generateAccessToken = (user) => {
   return jwt.sign(
     { id: user.id, username: user.username, email: user.email },
     process.env.JWT_SECRET || 'supersecretkey',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+  );
+};
+
+const generateRefreshToken = (user) => {
+  return jwt.sign(
+    { id: user.id },
+    process.env.JWT_REFRESH_SECRET || 'supersecretrefreshkey',
+    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
   );
 };
 
@@ -66,18 +74,24 @@ exports.register = async (req, res) => {
       ]
     });
 
-    // Generate JWT
-    const token = generateToken(userWithAssociations);
+    // Generate JWT and Refresh token
+    const token = generateAccessToken(userWithAssociations);
+    const refreshToken = generateRefreshToken(userWithAssociations);
+
+    // Save refresh token to database
+    await user.update({ refreshToken });
 
     const userJson = userWithAssociations.toJSON();
     delete userJson.password;
+    delete userJson.refreshToken;
 
     return res.status(201).json({
       success: true,
       message: 'User registered successfully.',
       data: {
         user: userJson,
-        token
+        token,
+        refreshToken
       }
     });
   } catch (error) {
@@ -136,23 +150,122 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generate JWT
-    const token = generateToken(user);
+    // Generate Access & Refresh tokens
+    const token = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    // Remove password before responding
+    // Save refresh token to database
+    await user.update({ refreshToken });
+
+    // Remove sensitive/internal columns before responding
     const userJson = user.toJSON();
     delete userJson.password;
+    delete userJson.refreshToken;
 
     return res.status(200).json({
       success: true,
       message: 'Logged in successfully.',
       data: {
         user: userJson,
-        token
+        token,
+        refreshToken
       }
     });
   } catch (error) {
     console.error('Login error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error.'
+    });
+  }
+};
+
+exports.refresh = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token is required.'
+      });
+    }
+
+    // Verify refresh token signature
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'supersecretrefreshkey');
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token.'
+      });
+    }
+
+    // Retrieve user including password and refreshToken fields
+    const user = await User.scope('withPassword').findByPk(decoded.id, {
+      include: [
+        { model: Laboratorium, as: 'laboratorium' },
+        { model: Role, as: 'role' }
+      ]
+    });
+
+    // Check if user exists and token matches
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token.'
+      });
+    }
+
+    // Generate new access token and rotate the refresh token
+    const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+
+    // Save new refresh token to DB
+    await user.update({ refreshToken: newRefreshToken });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Token refreshed successfully.',
+      data: {
+        token: newAccessToken,
+        refreshToken: newRefreshToken
+      }
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error.'
+    });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token is required.'
+      });
+    }
+
+    // Find the user with this refresh token
+    const user = await User.scope('withPassword').findOne({ where: { refreshToken } });
+    if (user) {
+      // Clear refresh token in database to prevent reuse
+      await user.update({ refreshToken: null });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Logged out successfully.'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error.'

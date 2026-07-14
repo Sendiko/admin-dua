@@ -10,7 +10,7 @@ A premium, state-of-the-art RESTful API built with **Express.js**, **Sequelize O
 - **ORM**: Sequelize ORM
 - **Database Support**: MySQL, PostgreSQL, MariaDB (Configurable via environment variables)
 - **Security**: Password hashing with `bcryptjs`
-- **Authentication**: JWT (JSON Web Tokens)
+- **Authentication**: JWT (JSON Web Tokens) with Token Rotation support
 - **Development Utility**: `nodemon` & `sequelize-cli`
 
 ---
@@ -54,7 +54,9 @@ Ensure you have the following installed on your system:
 
    # JWT Settings
    JWT_SECRET=supersecretkeyantigravityadminapp123456!
-   JWT_EXPIRES_IN=24h
+   JWT_EXPIRES_IN=15m
+   JWT_REFRESH_SECRET=supersecretrefreshkeyantigravityadminapp123456!
+   JWT_REFRESH_EXPIRES_IN=7d
    ```
 
 ---
@@ -102,8 +104,10 @@ Once started, the API will listen on the port specified in `.env` (default is `h
 ## 🗺️ API Routes Summary
 
 ### 🔑 Authentication (`/api/auth`)
-* `POST /api/auth/register` - General user registration.
-* `POST /api/auth/login` - Authenticate using email/username and password. Returns JWT token.
+* `POST /api/auth/register` - General user registration. Returns `token` and `refreshToken`.
+* `POST /api/auth/login` - Authenticate using email/username and password. Returns `token` (accessToken) and `refreshToken`.
+* `POST /api/auth/refresh` - Refresh access token using rotation mechanism. Returns a new `token` and a new `refreshToken`.
+* `POST /api/auth/logout` - Clear refresh token from the database.
 * `GET /api/auth/me` - Retrieve the profile details of the currently authenticated user (requires token).
 
 ### 🧪 Laboran / Managers (`/api/laboran`)
