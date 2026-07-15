@@ -8,6 +8,7 @@ const barangHilangRoutes = require('./baranghilang.routes');
 const lokasiRoutes = require('./lokasi.routes');
 const kategoriRoutes = require('./kategori.routes');
 const bapRoutes = require('./bap.routes');
+const barangRoutes = require('./barang.routes');
 
 // Healthcheck route
 router.get('/health', (req, res) => {
@@ -41,5 +42,8 @@ router.use('/kategori', kategoriRoutes);
 
 // Mount Bap routes
 router.use('/bap', bapRoutes);
+
+// Mount barang routes
+router.use('/barang', barangRoutes);
 
 module.exports = router;

@@ -373,3 +373,34 @@ Restricted to users with the **Asisten** role. Allows assistants to update their
     ```
 * **PUT** `/barang-hilang/:id` - Update lost item details.
 * **DELETE** `/barang-hilang/:id` - Delete lost item entry.
+
+---
+
+## 📦 Barang CRUD (`/barang`)
+
+* **GET** `/barang` - List all items (with associated `laboratorium`, `lokasi`, and `kategori` data).
+* **GET** `/barang/:id` - Fetch single item details by ID.
+* **POST** `/barang` - Create a new item (Open to `'Laboran'` and `'Asisten'`).
+  * Body:
+    ```json
+    {
+      "nama": "Solder Listrik 60W",
+      "jumlah": 10,
+      "id_laboratorium": "laboratorium-uuid",
+      "id_lokasi": "lokasi-uuid",
+      "id_kategori": "kategori-uuid"
+    }
+    ```
+* **PUT** `/barang/:id` - Update item details (Open to `'Laboran'` and `'Asisten'`).
+  * Body (All fields optional):
+    ```json
+    {
+      "nama": "Solder Listrik 60W Updated",
+      "jumlah": 12,
+      "id_laboratorium": "new-laboratorium-uuid",
+      "id_lokasi": "new-lokasi-uuid",
+      "id_kategori": "new-kategori-uuid"
+    }
+    ```
+* **DELETE** `/barang/:id` - Delete item (Open to `'Laboran'` and `'Asisten'`).
+
