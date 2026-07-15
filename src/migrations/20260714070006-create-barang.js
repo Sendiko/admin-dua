@@ -18,6 +18,11 @@ module.exports = {
         allowNull: false,
         defaultValue: 0
       },
+      status: {
+        type: Sequelize.ENUM('Baik', 'Rusak Ringan', 'Rusak Berat'),
+        allowNull: false,
+        defaultValue: 'Baik'
+      },
       id_laboratorium: {
         type: Sequelize.UUID,
         allowNull: true,

@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0
     },
     type: {
-      type: DataTypes.ENUM('kegiatan', 'peminjaman', 'pengembalian'),
+      type: DataTypes.ENUM('pelayanan', 'pengecekan', 'maintenance', 'lainnya'),
       allowNull: false
     },
     id_laboratorium: {

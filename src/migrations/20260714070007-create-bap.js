@@ -36,7 +36,7 @@ module.exports = {
         defaultValue: 0
       },
       type: {
-        type: Sequelize.ENUM('kegiatan', 'peminjaman', 'pengembalian'),
+        type: Sequelize.ENUM('pelayanan', 'pengecekan', 'maintenance', 'lainnya'),
         allowNull: false
       },
       id_laboratorium: {

@@ -234,16 +234,18 @@ Restricted to users with the **Laboran** role. Register a user under the `'Asist
         "email": "tono@admin.com",
         "nama_lengkap": "Tono Wijaya",
         "profileUrl": "https://example.com/profiles/tono.jpg",
-        "id_laboratorium": "d3b07384-d113-41e9-a7e8-e21501b17a10",
         "id_role": "asisten-role-uuid",
         "nomor_telepon": "081234567891",
         "createdAt": "2026-07-14T07:11:00.000Z",
         "updatedAt": "2026-07-14T07:11:00.000Z",
-        "laboratorium": { ... },
+        "laboratorium": {
+          "id": "d3b07384-d113-41e9-a7e8-e21501b17a10",
+          "kode": "E1",
+          "nama": "Laboratorium E1"
+        },
         "role": {
           "id": "asisten-role-uuid",
-          "nama": "Asisten",
-          ...
+          "nama": "Asisten"
         }
       }
     }
@@ -257,7 +259,87 @@ Restricted to users with the **Laboran** role. Register a user under the `'Asist
   }
   ```
 
+### 2. Get All Assistants
+Retrieve list of all registered laboratory assistants. Restricted to users with the **Laboran** role.
+* **Method**: `GET`
+* **URL**: `/laboran/asisten`
+* **Headers**:
+  - `Authorization: Bearer <laboran_access_token>`
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "2b9a7c6f-a9de-4b13-ba14-5d51381deac0",
+        "username": "asisten_tono",
+        "email": "tono@admin.com",
+        "nama_lengkap": "Tono Wijaya",
+        "profileUrl": "https://example.com/profiles/tono.jpg",
+        "id_role": "asisten-role-uuid",
+        "nomor_telepon": "081234567891",
+        "createdAt": "2026-07-14T07:11:00.000Z",
+        "updatedAt": "2026-07-14T07:11:00.000Z",
+        "laboratorium": {
+          "id": "d3b07384-d113-41e9-a7e8-e21501b17a10",
+          "kode": "E1",
+          "nama": "Laboratorium E1"
+        },
+        "role": {
+          "id": "asisten-role-uuid",
+          "nama": "Asisten"
+        }
+      }
+    ]
+  }
+  ```
+
+### 3. Update Assistant's Laboratory
+Assign or change the laboratory of a specific assistant. Restricted to users with the **Laboran** role.
+* **Method**: `PUT`
+* **URL**: `/laboran/asisten/:id/laboratorium`
+* **Headers**:
+  - `Authorization: Bearer <laboran_access_token>`
+  - `Content-Type: application/json`
+* **Request Body**:
+  ```json
+  {
+    "id_laboratorium": "d3b07384-d113-41e9-a7e8-e21501b17a10"
+  }
+  ```
+  *(Note: Send `null` to remove the assistant from any laboratory)*
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Assistant's laboratory updated successfully.",
+    "data": {
+      "user": {
+        "id": "2b9a7c6f-a9de-4b13-ba14-5d51381deac0",
+        "username": "asisten_tono",
+        "email": "tono@admin.com",
+        "nama_lengkap": "Tono Wijaya",
+        "profileUrl": "https://example.com/profiles/tono.jpg",
+        "id_role": "asisten-role-uuid",
+        "nomor_telepon": "081234567891",
+        "createdAt": "2026-07-14T07:11:00.000Z",
+        "updatedAt": "2026-07-15T06:40:00.000Z",
+        "laboratorium": {
+          "id": "d3b07384-d113-41e9-a7e8-e21501b17a10",
+          "kode": "E1",
+          "nama": "Laboratorium E1"
+        },
+        "role": {
+          "id": "asisten-role-uuid",
+          "nama": "Asisten"
+        }
+      }
+    }
+  }
+  ```
+
 ---
+
 
 ## 💼 Asisten Endpoints (`/asisten`)
 
@@ -287,11 +369,19 @@ Restricted to users with the **Asisten** role. Allows assistants to update their
         "email": "tono@admin.com",
         "nama_lengkap": "Tono Wijaya M.T.",
         "profileUrl": "https://example.com/profiles/tono.jpg",
-        "id_laboratorium": "d3b07384-d113-41e9-a7e8-e21501b17a10",
         "id_role": "asisten-role-uuid",
         "nomor_telepon": "089876543210",
         "createdAt": "2026-07-14T07:11:00.000Z",
-        "updatedAt": "2026-07-14T07:12:00.000Z"
+        "updatedAt": "2026-07-14T07:12:00.000Z",
+        "laboratorium": {
+          "id": "d3b07384-d113-41e9-a7e8-e21501b17a10",
+          "kode": "E1",
+          "nama": "Laboratorium E1"
+        },
+        "role": {
+          "id": "asisten-role-uuid",
+          "nama": "Asisten"
+        }
       }
     }
   }
@@ -373,3 +463,56 @@ Restricted to users with the **Asisten** role. Allows assistants to update their
     ```
 * **PUT** `/barang-hilang/:id` - Update lost item details.
 * **DELETE** `/barang-hilang/:id` - Delete lost item entry.
+
+---
+
+## 📦 Barang CRUD (`/barang`)
+
+* **GET** `/barang` - List all items. Returns an array of items where `laboratorium`, `lokasi`, and `kategori` are replaced with their text names.
+  * Response format:
+    ```json
+    {
+      "success": true,
+      "data": [
+        {
+          "id": "item-uuid",
+          "nama": "Solder Listrik 60W",
+          "jumlah": 10,
+          "status": "Baik",
+          "laboratorium": "Laboratorium E1",
+          "lokasi": "Gedung A Ruang 203",
+          "kategori": "Perkakas",
+          "createdAt": "2026-07-15T06:21:00.000Z",
+          "updatedAt": "2026-07-15T06:21:00.000Z"
+        }
+      ]
+    }
+    ```
+* **GET** `/barang/:id` - Fetch single item details by ID.
+* **POST** `/barang` - Create a new item (Open to `'Laboran'` and `'Asisten'`).
+  * Body:
+    ```json
+    {
+      "nama": "Solder Listrik 60W",
+      "jumlah": 10,
+      "status": "Baik",
+      "id_laboratorium": "laboratorium-uuid",
+      "id_lokasi": "lokasi-uuid",
+      "id_kategori": "kategori-uuid"
+    }
+    ```
+  * Note: `status` defaults to `"Baik"`. Allowed values are `"Baik"`, `"Rusak Ringan"`, and `"Rusak Berat"`.
+* **PUT** `/barang/:id` - Update item details (Open to `'Laboran'` and `'Asisten'`).
+  * Body (All fields optional):
+    ```json
+    {
+      "nama": "Solder Listrik 60W Updated",
+      "jumlah": 12,
+      "status": "Rusak Ringan",
+      "id_laboratorium": "new-laboratorium-uuid",
+      "id_lokasi": "new-lokasi-uuid",
+      "id_kategori": "new-kategori-uuid"
+    }
+    ```
+* **DELETE** `/barang/:id` - Delete item (Open to `'Laboran'` and `'Asisten'`).
+
