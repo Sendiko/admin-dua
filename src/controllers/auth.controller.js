@@ -20,15 +20,15 @@ const generateRefreshToken = (user) => {
 
 exports.register = async (req, res) => {
   try {
-    const { 
-      username, 
-      email, 
-      password, 
-      nama_lengkap, 
-      profileUrl, 
-      id_laboratorium, 
-      id_role, 
-      nomor_telepon 
+    const {
+      username,
+      email,
+      password,
+      nama_lengkap,
+      profileUrl,
+      id_laboratorium,
+      id_role,
+      nomor_telepon
     } = req.body;
 
     if (!username || !email || !password || !nama_lengkap) {
@@ -48,22 +48,22 @@ exports.register = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: existingUser.email === email 
-          ? 'Email already in use.' 
+        message: existingUser.email === email
+          ? 'Email already in use.'
           : 'Username already in use.'
       });
     }
 
     // Create user. Hooks hash the password automatically.
-    const user = await User.create({ 
-      username, 
-      email, 
-      password, 
-      nama_lengkap, 
-      profileUrl, 
-      id_laboratorium, 
-      id_role, 
-      nomor_telepon 
+    const user = await User.create({
+      username,
+      email,
+      password,
+      nama_lengkap,
+      profileUrl,
+      id_laboratorium,
+      id_role,
+      nomor_telepon
     });
 
     // Fetch user with associations for standard response
@@ -116,17 +116,14 @@ exports.login = async (req, res) => {
     if (!login || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email/Username and password are required.'
+        message: 'Username and password are required.'
       });
     }
 
     // Retrieve user using the scope that includes password
     const user = await User.scope('withPassword').findOne({
       where: {
-        [Op.or]: [
-          { email: login },
-          { username: login }
-        ]
+        username: login
       },
       include: [
         { model: Laboratorium, as: 'laboratorium' },
