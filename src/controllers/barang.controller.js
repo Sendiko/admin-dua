@@ -1,5 +1,20 @@
 const { Barang, Laboratorium, Lokasi, Kategori } = require('../models');
 
+const formatBarang = (item) => {
+  const itemJson = item.toJSON();
+  return {
+    id: itemJson.id,
+    nama: itemJson.nama,
+    jumlah: itemJson.jumlah,
+    status: itemJson.status,
+    laboratorium: itemJson.laboratorium ? itemJson.laboratorium.nama : null,
+    lokasi: itemJson.lokasi ? itemJson.lokasi.nama : null,
+    kategori: itemJson.kategori ? itemJson.kategori.nama : null,
+    createdAt: itemJson.createdAt,
+    updatedAt: itemJson.updatedAt
+  };
+};
+
 // GET all barang (items)
 exports.getAllBarang = async (req, res) => {
   try {
@@ -12,9 +27,11 @@ exports.getAllBarang = async (req, res) => {
       order: [['nama', 'ASC']]
     });
 
+    const formattedItems = items.map(formatBarang);
+
     return res.status(200).json({
       success: true,
-      data: items
+      data: formattedItems
     });
   } catch (error) {
     console.error('Get all barang error:', error);
@@ -46,7 +63,7 @@ exports.getBarangById = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: item
+      data: formatBarang(item)
     });
   } catch (error) {
     console.error('Get barang by id error:', error);
@@ -60,13 +77,21 @@ exports.getBarangById = async (req, res) => {
 // CREATE a barang record
 exports.createBarang = async (req, res) => {
   try {
-    const { nama, jumlah, id_laboratorium, id_lokasi, id_kategori } = req.body;
+    const { nama, jumlah, status, id_laboratorium, id_lokasi, id_kategori } = req.body;
 
     // Validate required fields
     if (!nama) {
       return res.status(400).json({
         success: false,
         message: 'Nama is required.'
+      });
+    }
+
+    // Validate status if provided
+    if (status && !['Baik', 'Rusak Ringan', 'Rusak Berat'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status must be one of: Baik, Rusak Ringan, Rusak Berat.'
       });
     }
 
@@ -104,6 +129,7 @@ exports.createBarang = async (req, res) => {
     const item = await Barang.create({
       nama,
       jumlah: jumlah || 0,
+      status: status || 'Baik',
       id_laboratorium,
       id_lokasi,
       id_kategori
@@ -121,7 +147,7 @@ exports.createBarang = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'Barang created successfully.',
-      data: createdItem
+      data: formatBarang(createdItem)
     });
   } catch (error) {
     console.error('Create barang error:', error);
@@ -142,7 +168,7 @@ exports.createBarang = async (req, res) => {
 exports.updateBarang = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nama, jumlah, id_laboratorium, id_lokasi, id_kategori } = req.body;
+    const { nama, jumlah, status, id_laboratorium, id_lokasi, id_kategori } = req.body;
 
     const item = await Barang.findByPk(id);
     if (!item) {
@@ -150,6 +176,17 @@ exports.updateBarang = async (req, res) => {
         success: false,
         message: 'Barang not found.'
       });
+    }
+
+    // Validate status if provided
+    if (status !== undefined) {
+      if (!['Baik', 'Rusak Ringan', 'Rusak Berat'].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Status must be one of: Baik, Rusak Ringan, Rusak Berat.'
+        });
+      }
+      item.status = status;
     }
 
     // Validate foreign keys if they are being updated
@@ -209,7 +246,7 @@ exports.updateBarang = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Barang updated successfully.',
-      data: updatedItem
+      data: formatBarang(updatedItem)
     });
   } catch (error) {
     console.error('Update barang error:', error);

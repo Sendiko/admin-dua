@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 0
     },
+    status: {
+      type: DataTypes.ENUM('Baik', 'Rusak Ringan', 'Rusak Berat'),
+      allowNull: false,
+      defaultValue: 'Baik'
+    },
     id_laboratorium: {
       type: DataTypes.UUID,
       allowNull: true

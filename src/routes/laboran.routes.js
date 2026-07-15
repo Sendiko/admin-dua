@@ -8,5 +8,7 @@ const { authorize } = require('../middleware/role.middleware');
 router.use(authMiddleware, authorize('Laboran'));
 
 router.post('/register-asisten', laboranController.registerAsisten);
+router.get('/asisten', laboranController.getAllAsisten);
+router.put('/asisten/:id/laboratorium', laboranController.setAsistenLaboratorium);
 
 module.exports = router;

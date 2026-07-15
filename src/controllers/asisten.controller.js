@@ -11,13 +11,13 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
-    const { 
-      username, 
-      email, 
-      password, 
-      nama_lengkap, 
-      profileUrl, 
-      nomor_telepon 
+    const {
+      username,
+      email,
+      password,
+      nama_lengkap,
+      profileUrl,
+      nomor_telepon
     } = req.body;
 
     // If updating username, check uniqueness
@@ -62,6 +62,7 @@ exports.updateProfile = async (req, res) => {
 
     const userJson = updatedUser.toJSON();
     delete userJson.password;
+    delete userJson.id_laboratorium;
 
     return res.status(200).json({
       success: true,
