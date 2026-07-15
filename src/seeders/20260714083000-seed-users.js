@@ -41,7 +41,6 @@ module.exports = {
       usersToInsert.push({
         id: crypto.randomUUID(),
         username: 'laboran_admin',
-        email: 'laboran@admin.com',
         password: hashedPassword,
         nama_lengkap: 'Laboran Administrator',
         profileUrl: null,
@@ -58,7 +57,6 @@ module.exports = {
       usersToInsert.push({
         id: crypto.randomUUID(),
         username: 'asisten_default',
-        email: 'asisten@admin.com',
         password: hashedPassword,
         nama_lengkap: 'Default Assistant',
         profileUrl: null,
